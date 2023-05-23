@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UsersManegment.Models;
+using UsersManegment.UserDefinedExceptions;
 using CsvHelper;
 using System.IO;
 using System.Globalization;
@@ -12,8 +13,6 @@ namespace UsersManegment.DataStorage
 {
     class DataStorageRepository
     {
-
-
 
         private List<User> users;
 
@@ -99,20 +98,18 @@ namespace UsersManegment.DataStorage
             return false;
         }
 
-
+        //There is an unsalved probelm with return type
         public List<User> GetAllRipository()
         {
-            List<User> Temp = null;
             if (users.Count != 0)
             {
                 return users;
             }
             else
             {
+                throw new DataNotFoundException("not found record from data storage!");
 
             }
-            return Temp;
-
 
         }
 
@@ -136,6 +133,11 @@ namespace UsersManegment.DataStorage
 
                 WriteOnFile();
             }
+            else
+            {
+                throw new ArgumentException("not found record from data storage!");
+
+            }
 
         }
 
@@ -147,7 +149,11 @@ namespace UsersManegment.DataStorage
                 users.Remove(user);
                 WriteOnFile();
             }
+            else
+            {
+                throw new ArgumentException("not found record from data storage!");
 
+            }
 
         }
 
@@ -157,6 +163,11 @@ namespace UsersManegment.DataStorage
             {
                 users.Add(user);
                 WriteOnFile();
+            }
+            else
+            {
+                throw new ArgumentException("The User has insertd!can't add duplicate user");
+
             }
         }
 
