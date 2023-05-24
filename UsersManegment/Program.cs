@@ -77,6 +77,10 @@ namespace UsersManegment
                 case "4":
                     DeleteUserMenu();
                     break;
+                default:
+                    NewUser();
+                    break;
+
 
             }
        
@@ -85,13 +89,21 @@ namespace UsersManegment
         private static void NewUser()
         {
             const int idStartPoint = 1000;
-
-            int Id = idStartPoint + DSR.UserCount + 1;
+            int Id = 0;
             string name;
             string phoneNumber;
             string birthDate;
 
             bool validationFlag = false;
+
+            if (DSR.UserCount == 0)
+            {
+                Id = idStartPoint + DSR.UserCount + 1;
+            }
+            else
+            {
+                Id = DSR.UserCount + 1;
+            }
 
             Console.Clear();
             Console.ForegroundColor = ConsoleColor.Red;
@@ -143,11 +155,11 @@ namespace UsersManegment
 
             } while (!validationFlag);
 
-           // User user = new User(Id, name, phoneNumber, Convert.ToDateTime(birthDate),DateTime.Now.Date);
+           User user = new User(Id, name, phoneNumber, Convert.ToDateTime(birthDate),DateTime.Now.Date);
 
             try
             {
-                //DSR.Insert(user);
+                DSR.Insert(user);
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("User have Registered");
                 Console.ResetColor();
@@ -196,11 +208,19 @@ namespace UsersManegment
             Console.WriteLine("select user to Edite or Delete");
             do
             {
+                if (menuFlag)
+                {
+                    menuFlag = false;
+                }
                 List<User> userTemperList = DSR.GetAllRipository();
                 int id;
 
                 Console.Write("Insert ID to select:");
                 UserId = Console.ReadLine();
+                if (UserId == "Q")
+                {
+                    EntryPoint();
+                }
                 if (!int.TryParse(UserId.Trim(), out id))
                 {
                     Console.WriteLine();
@@ -251,9 +271,13 @@ namespace UsersManegment
             switch (menuInput)
             {
                 case "1":
-                    NewUser();
+                    EditeUser(selectedUser);
+                    Thread.Sleep(2000);
+                    ShowUserList();
                     break;
                 case "2":
+                    DeleteUser(selectedUser);
+                    Thread.Sleep(2000);
                     ShowUserList();
                     break;
                 case "3":
@@ -270,7 +294,7 @@ namespace UsersManegment
             User selectedUser;
             string name;
             bool menuFlag = false;
-            char deleteFlag = 'N';
+
 
             Console.Clear();
             Console.ForegroundColor = ConsoleColor.Red;
@@ -308,27 +332,9 @@ namespace UsersManegment
             Console.WriteLine(selectedUser.ToString());
             Console.WriteLine();
 
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("Are sure to delete user? Y/N");
-            Console.ResetColor();
-            deleteFlag = Convert.ToChar(Console.ReadLine().Substring(0, 1));
-            if (deleteFlag =='Y')
-            {
-                DSR.Delete(selectedUser);
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("User have deleted");
-                Console.ResetColor();
-                Thread.Sleep(1000);
-                DeleteUserMenu();
-            }
-            else
-            {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("User did not delete");
-                Console.ResetColor();
-                Thread.Sleep(1000);
-                DeleteUserMenu();
-            }
+            DeleteUser(selectedUser);
+            Thread.Sleep(2000);
+            DeleteUserMenu();
 
             /*
            //Console.WriteLine();
@@ -365,13 +371,162 @@ namespace UsersManegment
 
         }
 
+
+        private static void DeleteUser(User user)
+        {
+            char deleteFlag = 'N';
+
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Are sure to delete user? Y/N");
+            Console.ResetColor();
+            deleteFlag = Convert.ToChar(Console.ReadLine().Substring(0, 1).ToUpper());
+            if (deleteFlag == 'Y')
+            {
+                DSR.Delete(user);
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("User have deleted.");
+                Console.ResetColor();
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("User did not delete.");
+                Console.ResetColor();
+            }
+        }
+
+
         private static void EditeUserMenu()
         {
-            throw new NotImplementedException();
+            User selectedUser;
+            string name;
+            bool menuFlag = false;
+
+
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("to Go previous menu write Q");
+            Console.ResetColor();
+            Console.WriteLine();
+            Console.WriteLine("select user to Edite");
+            do
+            {
+
+                if (menuFlag = true)
+                {
+                    menuFlag = false;
+                }
+
+                Console.Write("Insert Use Name:");
+                name = Console.ReadLine();
+                if (name == "Q")
+                {
+                    EntryPoint();
+                }
+
+                if (DSR.GetByName(name) == null)
+                {
+                    Console.WriteLine();
+                    Console.WriteLine("User not found!");
+                    Console.WriteLine();
+                    menuFlag = true;
+
+                }
+
+
+            } while (menuFlag);
+
+            Console.WriteLine();
+            selectedUser = DSR.GetByName(name);
+            Console.WriteLine();
+            Console.WriteLine("selected user is:");
+            Console.WriteLine(@"[ID]  [Name]   [PhoneNumber]     [BirthDate]     [CreationDate]");
+            Console.WriteLine("_____________________________________________________________________");
+            Console.WriteLine(selectedUser.ToString());
+            Console.WriteLine();
+
+            EditeUser(selectedUser);
+            Thread.Sleep(2000);
+            DeleteUserMenu();
+
         }
-        private static void EditeUser()
+        private static void EditeUser(User olduser)
         {
-            throw new NotImplementedException();
+            string name;
+            string phoneNumber;
+            string birthDate;
+            bool validationFlag = false;
+            char editeFlag = 'N';
+
+            Console.WriteLine();
+            do
+            { 
+                if (validationFlag)
+                {
+                    Console.WriteLine();
+                    validationFlag = false;
+                }
+
+                Console.WriteLine();
+                Console.WriteLine("Insert new Data to Edite User");
+                Console.Write("Name: ");
+                name = Console.ReadLine();
+                if (name == "Q")
+                {
+                    EditeUserMenu();
+                }
+
+                Console.Write(" PhoneNumber: ");
+                phoneNumber = Console.ReadLine();
+                if (phoneNumber == "Q")
+                {
+                    EditeUserMenu();
+                }
+
+                Console.Write("BitrhDay: ");
+                birthDate = Console.ReadLine();
+                if (birthDate == "Q")
+                {
+                    EditeUserMenu();
+                }
+
+                try
+                {
+                    validationFlag = Validation.NewUserVaildat(name, phoneNumber, birthDate);
+                }
+                catch (System.Exception msg)
+                {
+
+                    Console.WriteLine(msg.Message);
+                    validationFlag = false;
+                }
+
+
+            } while (!validationFlag);
+
+            User newuser = new User(olduser.id, name, phoneNumber, Convert.ToDateTime(birthDate), olduser.CreationDate);
+
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Are sure to save chenges? Y/N");
+            Console.ResetColor();
+            editeFlag = Convert.ToChar(Console.ReadLine().Substring(0, 1).ToUpper());
+
+            if (editeFlag == 'Y')
+            {
+                DSR.Update(olduser, newuser);
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("User info chenged.");
+                Console.ResetColor();
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("The chenges did not saved.");
+                Console.ResetColor();
+            }
+
+
+            
         }
 
 

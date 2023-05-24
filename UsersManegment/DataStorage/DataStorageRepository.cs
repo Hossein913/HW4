@@ -18,7 +18,16 @@ namespace UsersManegment.DataStorage
 
         public int UserCount
         {
-            get { return users.Count; }
+            get {
+                if (users.Count==0)
+                {
+                    return 0;
+                }
+                else
+                {
+                  return users.Last<User>().id;
+                }
+            }
         }
 
         public DataStorageRepository()
@@ -119,7 +128,11 @@ namespace UsersManegment.DataStorage
         {
             if (ExistUser(olduser))
             {
-                List<User> UserTemp = users;
+                List<User> UserTemp = new List<User>() ;
+                foreach (var item in users)
+                {
+                    UserTemp.Add(item);
+                }
                 users.Clear();
                 foreach (var item in UserTemp)
                 {
