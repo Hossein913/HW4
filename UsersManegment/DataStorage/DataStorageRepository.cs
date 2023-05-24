@@ -107,7 +107,7 @@ namespace UsersManegment.DataStorage
             }
             else
             {
-                throw new DataNotFoundException("not found record from data storage!");
+                throw new DefinedException();
 
             }
 

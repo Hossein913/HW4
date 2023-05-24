@@ -6,11 +6,8 @@ using System.Threading.Tasks;
 
 namespace UsersManegment.UserDefinedExceptions
 {
-    class DataNotFoundException : SystemException
+    class DefinedException : SystemException
     {
-        public DataNotFoundException(string msg) : base(msg)
-        { 
-        
-        }
+            public override string Message => $"not found record from data storage!";
     }
 }
