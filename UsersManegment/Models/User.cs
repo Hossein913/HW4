@@ -8,6 +8,18 @@ namespace UsersManegment.Models
 {
     public class User
     {
+        public User()
+        {
+        }
+        public User(int id, string name, string phonenumber, DateTime birthdate, DateTime creationdate)
+        {
+            this.id =id;
+            Name = name;
+            PhoneNumber = phonenumber;
+            BirthDate = birthdate;
+            CreationDate = creationdate;
+        }
+
         public int id { get; set; }
         public string Name { get; set; }
         public string PhoneNumber { get; set; }

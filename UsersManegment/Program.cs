@@ -2,22 +2,33 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using UsersManegment.DataStorage;
+using UsersManegment.Models;
 using UsersManegment.Services;
 
 namespace UsersManegment
 {
     class Program
     {
+
         public static DataStorageRepository DSR ;
-        public Program()
-        {
-            DSR = new DataStorageRepository();
-        }
+
         static void Main(string[] args)
         {
-            EntryPoint();
+            try
+            {
+                DSR = new DataStorageRepository();
+                EntryPoint();
+            }
+            catch (Exception msg)
+	        {
+
+                Console.WriteLine(msg.Message);
+                Console.ReadLine();
+            }
+
         }
 
 
@@ -27,7 +38,7 @@ namespace UsersManegment
             string menuInput = "";
 
             Console.Clear();
-            Console.WriteLine(":: Wellcome to UserMenegment system ::");
+            Console.WriteLine(":: Wellcome to UserManegment system ::");
             Console.WriteLine();
             Console.WriteLine(" -> Main Menu ");
             Console.WriteLine("[1]. Insert new user");
@@ -61,13 +72,14 @@ namespace UsersManegment
                     ShowUserList();
                     break;
                 case "3":
-                    EditeUser();
+                    EditeUserMenu();
                     break;
                 case "4":
-                    DeleteUser();
+                    DeleteUserMenu();
                     break;
 
             }
+       
         }
 
         private static void NewUser()
@@ -79,33 +91,23 @@ namespace UsersManegment
             string phoneNumber;
             string birthDate;
 
-            //bool validationFlag = true;
-            bool existingFlag = false;
+            bool validationFlag = false;
 
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("to Go previous menu write Q");
+            Console.ResetColor();
 
             do
             {
-                //if (!validationFlag)
-                //{
-                //    Console.WriteLine();
-                //    validationFlag = true;
 
-                //}
-
-                if (existingFlag)
+                if (validationFlag)
                 {
-                    existingFlag = false;
+                    Console.WriteLine();
+                    validationFlag = false;
                 }
-                Console.Clear();
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("to Go previous menu write Q");
-                Console.ResetColor();
 
                 Console.WriteLine("Fill out the registeration form:");
-
-
-
-
                 Console.Write("Name: ");
                 name = Console.ReadLine();
                 if (name == "Q")
@@ -127,55 +129,28 @@ namespace UsersManegment
                     EntryPoint();
                 }
 
-                //try
-                //{
-                //    validationFlag = Validation.RoleValidation(role.Trim());
-                //}
-                //catch (System.Exception msg)
-                //{
-
-                //    Console.WriteLine(msg.Message);
-                //    validationFlag = false;
-                //}
-
-                //if (validationFlag)
-                //{
-                //        existingFlag = Authenticat.checkUserExist(email, password);
-                //}
-
-                //if (validationFlag && !existingFlag)
-                //{
-                //    reInput = false;
-                //}
-
-                existingFlag = Authenticat.checkUserExist(email, password);
-
-                if (existingFlag)
+                try
                 {
-                    Console.WriteLine("Member has registered!");
-                    Thread.Sleep(2000);
+                    validationFlag = Validation.NewUserVaildat(name, phoneNumber, birthDate);
+                }
+                catch (System.Exception msg)
+                {
+
+                    Console.WriteLine(msg.Message);
+                    validationFlag = false;
                 }
 
-            } while (existingFlag);
 
-            Role curentRole = Role.Member;
-            switch (role)
-            {
-                case "1":
-                    curentRole = Role.Librarian;
-                    break;
-                case "2":
-                    curentRole = Role.Member;
-                    break;
-                default:
-                    break;
-            }
+            } while (!validationFlag);
 
-            Person person = new Person(Id, name, email, password, curentRole);
+           // User user = new User(Id, name, phoneNumber, Convert.ToDateTime(birthDate),DateTime.Now.Date);
+
             try
             {
-                Authenticat.Register(person);
-                Console.WriteLine("you have Registered ");
+                //DSR.Insert(user);
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("User have Registered");
+                Console.ResetColor();
                 Thread.Sleep(3000);
                 EntryPoint();
             }
@@ -184,28 +159,225 @@ namespace UsersManegment
 
                 Console.WriteLine(msg.Message);
                 Thread.Sleep(3000);
-                RunRegister();
+                NewUser();
             }
 
 
 
         }
 
+        private static void ShowUserList()
+        {
+            User selectedUser;
+            int Printcounter=1;
+            string UserId;
+            string menuInput;
+            bool menuFlag = false;
 
-        private static void DeleteUser()
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("to Go previous menu write Q");
+            Console.ResetColor();
+            Console.WriteLine();
+            Console.WriteLine(@"[ID]  [Name]   [PhoneNumber]     [BirthDate]     [CreationDate]");
+            Console.WriteLine("_____________________________________________________________________");
+            DSR.GetAllRipository().ForEach(
+            item => {
+                if (Printcounter%2 == 0)
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                }
+                Console.WriteLine(item.ToString());
+                Console.ResetColor();
+                Printcounter++;
+            });
+
+            Console.WriteLine();
+            Console.WriteLine("select user to Edite or Delete");
+            do
+            {
+                List<User> userTemperList = DSR.GetAllRipository();
+                int id;
+
+                Console.Write("Insert ID to select:");
+                UserId = Console.ReadLine();
+                if (!int.TryParse(UserId.Trim(), out id))
+                {
+                    Console.WriteLine();
+                    Console.WriteLine("Invalid ID!");
+                    Console.WriteLine();
+                    menuFlag = true;
+                }
+                else if(DSR.GetById(id)==null)
+                {
+                    Console.WriteLine();
+                    Console.WriteLine("User not found!");
+                    Console.WriteLine();
+                    menuFlag = true;
+
+                }
+
+            } while (menuFlag);
+
+            selectedUser = DSR.GetById(int.Parse(UserId));
+            Console.WriteLine();
+            Console.WriteLine("selected user is:");
+            Console.WriteLine(@"[ID]  [Name]   [PhoneNumber]     [BirthDate]     [CreationDate]");
+            Console.WriteLine("_____________________________________________________________________");
+            Console.WriteLine(selectedUser.ToString());
+
+            Console.WriteLine();
+            Console.WriteLine("select menu: ");
+            Console.WriteLine("[1]. Edite user");
+            Console.WriteLine("[2]. delete user");
+            Console.WriteLine("[3]. back");
+            Console.WriteLine();
+            do
+            {
+                Console.Write("Insert menu number:");
+                menuInput = Console.ReadLine();
+                try
+                {
+                    menuFlag = Validation.MenuControl(menuInput, 3);
+                }
+                catch (SystemException ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    menuFlag = true;
+                }
+
+            } while (menuFlag);
+
+            switch (menuInput)
+            {
+                case "1":
+                    NewUser();
+                    break;
+                case "2":
+                    ShowUserList();
+                    break;
+                case "3":
+                    EntryPoint();
+                    break;
+
+            }
+
+
+        }
+
+        private static void DeleteUserMenu()
+        {
+            User selectedUser;
+            string name;
+            bool menuFlag = false;
+            char deleteFlag = 'N';
+
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("to Go previous menu write Q");
+            Console.ResetColor();
+            Console.WriteLine();
+            Console.WriteLine("select user to Delete");
+            do
+            {
+                Console.Write("Insert Use Name:");
+                name = Console.ReadLine();
+                if (name == "Q")
+                {
+                    EntryPoint();
+                }
+
+                if (DSR.GetByName(name) == null)
+                {
+                    Console.WriteLine();
+                    Console.WriteLine("User not found!");
+                    Console.WriteLine();
+                    menuFlag = true;
+
+                }
+
+
+            } while (menuFlag);
+
+            Console.WriteLine();
+            selectedUser = DSR.GetByName(name);
+            Console.WriteLine();
+            Console.WriteLine("selected user is:");
+            Console.WriteLine(@"[ID]  [Name]   [PhoneNumber]     [BirthDate]     [CreationDate]");
+            Console.WriteLine("_____________________________________________________________________");
+            Console.WriteLine(selectedUser.ToString());
+            Console.WriteLine();
+
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Are sure to delete user? Y/N");
+            Console.ResetColor();
+            deleteFlag = Convert.ToChar(Console.ReadLine().Substring(0, 1));
+            if (deleteFlag =='Y')
+            {
+                DSR.Delete(selectedUser);
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("User have deleted");
+                Console.ResetColor();
+                Thread.Sleep(1000);
+                DeleteUserMenu();
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("User did not delete");
+                Console.ResetColor();
+                Thread.Sleep(1000);
+                DeleteUserMenu();
+            }
+
+            /*
+           //Console.WriteLine();
+           //Console.WriteLine("select user to Delete");
+           //do
+           //{
+           //    Console.Write("Insert Use Name:");
+           //    name = Console.ReadLine();
+
+           //    if (DSR.GetByproperty<string>
+           //        (name, DSR.GetAllRipository(), (x, b) =>
+           //          {
+           //              foreach (var item in b)
+           //              {
+           //                  if (item.Name == x)
+           //                  {
+           //                      return item;
+           //                  }
+           //              }
+           //              return null;
+           //          }
+           //        ) == null)
+           //    {
+           //        Console.WriteLine();
+           //        Console.WriteLine("User not found!");
+           //        Console.WriteLine();
+           //        menuFlag = true;
+
+           //    }
+
+           //} while (menuFlag);
+           */
+
+
+        }
+
+        private static void EditeUserMenu()
         {
             throw new NotImplementedException();
         }
-
         private static void EditeUser()
         {
             throw new NotImplementedException();
         }
 
-        private static void ShowUserList()
-        {
-            throw new NotImplementedException();
-        }
+
+
+
+
 
 
     }

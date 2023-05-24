@@ -44,8 +44,15 @@ namespace UsersManegment.DataStorage
         {
             try
             {
-                using (CsvReader csvReader = new CsvReader(new StreamReader(".\\FileDateStorage.csv"), CultureInfo.InvariantCulture))
-                {
+            }
+            catch (Exception)
+            {
+
+                throw new NullReferenceException("There is problem with access to storage file!Run the aplication again");
+            }
+
+            using (CsvReader csvReader = new CsvReader(new StreamReader(".\\FileDateStorage.csv"), CultureInfo.InvariantCulture))
+            {
 
                     csvReader.Read();
                     csvReader.ReadHeader();
@@ -55,14 +62,9 @@ namespace UsersManegment.DataStorage
 
                     }
 
-                }
-
             }
-            catch (Exception)
-            {
 
-                throw new NullReferenceException("There is problem with access to storage file!Run the aplication again");
-            }
+
 
         }
 
@@ -172,8 +174,37 @@ namespace UsersManegment.DataStorage
         }
 
 
+        public User GetById(int id)
+        {
+            foreach (var item in users)
+            {
+                if (item.id == id)
+                {
+                    return item;
+                }
+            }
+            return null;
+        
+        }
 
+        public User GetByName(string name)
+        {
+            foreach (var item in users)
+            {
+                if (item.Name.ToLower() == name.ToLower())
+                {
+                    return item;
+                }
+            }
+            return null;
 
+        }
 
+        //public delegate User Wherecondition<T>(T prop,List<User> userlist);
+        //public User GetByproperty<T>(T prop, List<User> userlist, Wherecondition<T> wherecondition)
+        //{
+        //    return wherecondition(prop, userlist);
+
+        //}
     }
 }

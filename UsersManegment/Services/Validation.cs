@@ -29,7 +29,32 @@ namespace UsersManegment.Services
 
         }
 
+        internal static bool NewUserVaildat(string name, string phonenumstring, string birthDate)
+        {
+            long phonenumber;
+            DateTime BirthDate ;
 
-
+            if (name.Length > 30)
+            {
+                return false;
+                throw new ArgumentOutOfRangeException("User name can't be greater than 30 character!");
+            }
+            else if (!Int64.TryParse(phonenumstring.Trim(),out phonenumber))
+            {
+                return false;
+                throw new ArgumentOutOfRangeException("Invalid phonenumber!");
+            }
+            if (!DateTime.TryParse(birthDate.Trim(),out BirthDate))
+            {
+                return false;
+                throw new ArgumentOutOfRangeException("Invalid Data has inserted as BirthDate!");
+            }
+            if ( DateTime.Compare(BirthDate, DateTime.Now) >= 0 )
+            {
+                return false;
+                throw new ArgumentOutOfRangeException("Invalid Date has inserted as BirthDate!");
+            }
+            return true;
+        }
     }
 }
